@@ -1,0 +1,6 @@
+@smart_notes_backend_HostAddress = http://localhost:5015
+
+GET {{smart_notes_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
