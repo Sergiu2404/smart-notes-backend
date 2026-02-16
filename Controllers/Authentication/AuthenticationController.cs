@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using smart_notes_backend.Entities.User;
 using smart_notes_backend.Models.Authentication;
 using smart_notes_backend.Services.Authentication;
+using System.Threading.Tasks;
 
 namespace smart_notes_backend.Controllers.Authentication
 {
@@ -14,32 +16,33 @@ namespace smart_notes_backend.Controllers.Authentication
         public static User user = new();
 
         [HttpPost("register")]
-        public ActionResult<User> Register(UserDto request)
+        public async Task<ActionResult<User>> Register(UserDto request)
         {
-            var hashedPassword = new PasswordHasher<User>()
-                .HashPassword(user, request.Password);
-
-            user.Username = request.Username;
-            user.PasswordHash = hashedPassword;
+            var user = await authenticationService.RegisterAsync(request);
+            if (user == null)
+            {
+                return BadRequest("Username already existing");
+            }
 
             return Ok(user);
         }
 
         [HttpPost("login")]
-        public ActionResult<string> Login(UserDto request)
+        public async Task<ActionResult<string>> Login(UserDto request)
         {
-            if (user.Username != request.Username)
+            var token = await authenticationService.LoginAsync(request);
+            if (token == null)
             {
-                return BadRequest("User not found");
+                return BadRequest("Invalid username or password");
             }
-            if (new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
-            {
-                return BadRequest("Wrong password");
-            }
-
-            string token = authenticationService.CreateToken(user);
-
             return Ok(token);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult SecuredEndpoint()
+        {
+            return Ok("Authenticated");
         }
     }
 }

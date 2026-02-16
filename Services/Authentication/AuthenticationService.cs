@@ -1,18 +1,24 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using smart_notes_backend.Data;
 using smart_notes_backend.Entities.User;
+using smart_notes_backend.Models.Authentication;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace smart_notes_backend.Services.Authentication
 {
-    public class AuthenticationService(IConfiguration configuration) : IAuthenticationService
+    public class AuthenticationService(IConfiguration configuration, UserDbContext userDbContext) : IAuthenticationService
     {
         public string CreateToken(User user)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Username)
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
 
             var signingKey = new SymmetricSecurityKey(
@@ -30,6 +36,43 @@ namespace smart_notes_backend.Services.Authentication
             );
 
             return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
+        }
+
+        public async Task<string?> LoginAsync(UserDto request)
+        {
+            var user = await userDbContext.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+
+            if (user == null)
+            {
+                return null;
+            }
+            if (new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, request.Password) == PasswordVerificationResult.Failed)
+            {
+                return null;
+            }
+
+            return CreateToken(user);
+        }
+
+        public async Task<User?> RegisterAsync(UserDto request)
+        {
+            if (await userDbContext.Users.AnyAsync(u => u.Username == request.Username))
+            {
+                return null;
+            }
+
+            var user = new User();
+
+            var hashedPassword = new PasswordHasher<User>()
+                .HashPassword(user, request.Password);
+
+            user.Username = request.Username;
+            user.PasswordHash = hashedPassword;
+
+            userDbContext.Users.Add(user);
+            await userDbContext.SaveChangesAsync();
+
+            return user;
         }
     }
 }

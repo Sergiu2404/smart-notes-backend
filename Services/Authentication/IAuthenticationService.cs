@@ -1,9 +1,12 @@
 ﻿using smart_notes_backend.Entities.User;
+using smart_notes_backend.Models.Authentication;
 
 namespace smart_notes_backend.Services.Authentication
 {
     public interface IAuthenticationService
     {
         string CreateToken(User user);
+        Task<User?> RegisterAsync(UserDto request);
+        Task<string?> LoginAsync(UserDto request);
     }
 }
