@@ -18,7 +18,8 @@ namespace smart_notes_backend.Services.Authentication
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
             var signingKey = new SymmetricSecurityKey(
@@ -38,7 +39,7 @@ namespace smart_notes_backend.Services.Authentication
             return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
         }
 
-        public async Task<string?> LoginAsync(UserDto request)
+        public async Task<string?> LoginAsync(UserLoginDto request)
         {
             var user = await userDbContext.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
 
@@ -54,7 +55,7 @@ namespace smart_notes_backend.Services.Authentication
             return CreateToken(user);
         }
 
-        public async Task<User?> RegisterAsync(UserDto request)
+        public async Task<User?> RegisterAsync(UserRegisterDto request)
         {
             if (await userDbContext.Users.AnyAsync(u => u.Username == request.Username))
             {
@@ -67,6 +68,7 @@ namespace smart_notes_backend.Services.Authentication
                 .HashPassword(user, request.Password);
 
             user.Username = request.Username;
+            user.Role = request.Role;
             user.PasswordHash = hashedPassword;
 
             userDbContext.Users.Add(user);

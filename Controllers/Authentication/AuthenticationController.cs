@@ -16,7 +16,7 @@ namespace smart_notes_backend.Controllers.Authentication
         public static User user = new();
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(UserDto request)
+        public async Task<ActionResult<User>> Register(UserRegisterDto request)
         {
             var user = await authenticationService.RegisterAsync(request);
             if (user == null)
@@ -28,7 +28,7 @@ namespace smart_notes_backend.Controllers.Authentication
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(UserDto request)
+        public async Task<ActionResult<string>> Login(UserLoginDto request)
         {
             var token = await authenticationService.LoginAsync(request);
             if (token == null)
@@ -43,6 +43,13 @@ namespace smart_notes_backend.Controllers.Authentication
         public IActionResult SecuredEndpoint()
         {
             return Ok("Authenticated");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("admin-only")]
+        public IActionResult AdminOnlyEndpoint()
+        {
+            return Ok("Admin Authenticated");
         }
     }
 }

@@ -6,7 +6,7 @@ namespace smart_notes_backend.Services.Authentication
     public interface IAuthenticationService
     {
         string CreateToken(User user);
-        Task<User?> RegisterAsync(UserDto request);
-        Task<string?> LoginAsync(UserDto request);
+        Task<User?> RegisterAsync(UserRegisterDto request);
+        Task<string?> LoginAsync(UserLoginDto request);
     }
 }
