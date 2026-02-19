@@ -1,4 +1,4 @@
-﻿namespace smart_notes_backend.Entities.User
+﻿namespace smart_notes_backend.Entities
 {
     public enum UserRole
     {
@@ -11,5 +11,7 @@
         public string Username { get; set; }
         public string PasswordHash { get; set; }
         public UserRole Role { get; set; }
+
+        public virtual ICollection<Note> Notes { get; set; } = new List<Note>();
     }
 }

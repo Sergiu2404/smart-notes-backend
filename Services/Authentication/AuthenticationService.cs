@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using smart_notes_backend.Data;
-using smart_notes_backend.Entities.User;
+using smart_notes_backend.Entities;
 using smart_notes_backend.Models.Authentication;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,7 +11,7 @@ using System.Text;
 
 namespace smart_notes_backend.Services.Authentication
 {
-    public class AuthenticationService(IConfiguration configuration, UserDbContext userDbContext) : IAuthenticationService
+    public class AuthenticationService(IConfiguration configuration, SqlServerDbContext userDbContext) : IAuthenticationService
     {
         public string CreateToken(User user)
         {
@@ -20,7 +20,7 @@ namespace smart_notes_backend.Services.Authentication
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Role, user.Role.ToString())
-            };
+            }; 
 
             var signingKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(configuration.GetValue<string>("AppSettings:Token")!)

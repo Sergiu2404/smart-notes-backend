@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using smart_notes_backend.Data;
+using smart_notes_backend.Repositories.Notes;
 using smart_notes_backend.Services.Authentication;
 using System.Security.Claims;
 using System.Text;
@@ -18,11 +19,15 @@ builder.Services.AddSwaggerGen();
 builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
 
 // IoC Components
+// Repositories
+builder.Services.AddScoped<INotesRepository, NotesRepository>();
+
+// Services
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
 
-builder.Services.AddDbContext<UserDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("UserDatabase"))
+builder.Services.AddDbContext<SqlServerDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerDatabase"))
 );
 
 

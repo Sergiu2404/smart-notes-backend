@@ -1,4 +1,4 @@
-﻿using smart_notes_backend.Entities.User;
+﻿using smart_notes_backend.Entities;
 
 namespace smart_notes_backend.Models.Authentication
 {

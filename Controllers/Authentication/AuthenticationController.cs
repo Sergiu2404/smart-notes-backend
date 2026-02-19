@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using smart_notes_backend.Entities.User;
+using smart_notes_backend.Entities;
 using smart_notes_backend.Models.Authentication;
 using smart_notes_backend.Services.Authentication;
 using System.Threading.Tasks;

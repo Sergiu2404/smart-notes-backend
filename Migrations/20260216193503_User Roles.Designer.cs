@@ -11,7 +11,7 @@ using smart_notes_backend.Data;
 
 namespace smart_notes_backend.Migrations
 {
-    [DbContext(typeof(UserDbContext))]
+    [DbContext(typeof(SqlServerDbContext))]
     [Migration("20260216193503_User Roles")]
     partial class UserRoles
     {
