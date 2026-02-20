@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using smart_notes_backend.Data;
+using smart_notes_backend.Helpers.Authentication;
 using smart_notes_backend.Repositories.Notes;
 using smart_notes_backend.Services.Authentication;
+using smart_notes_backend.Services.Notes;
 using System.Security.Claims;
 using System.Text;
 
@@ -18,12 +20,19 @@ builder.Services.AddSwaggerGen();
 
 builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
 
+// accessor needed for user context
+builder.Services.AddHttpContextAccessor();
+
 // IoC Components
 // Repositories
 builder.Services.AddScoped<INotesRepository, NotesRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+// user context registration
+builder.Services.AddScoped<IUserContext, UserContext>();
+
+builder.Services.AddScoped<INotesService, NotesService>();
 
 
 builder.Services.AddDbContext<SqlServerDbContext>(options =>
@@ -61,6 +70,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -5,14 +5,13 @@ namespace smart_notes_backend.Repositories.Notes
 {
     public interface INotesRepository
     {
-        Task<Note?> GetByIdAsync(Guid id);
+        Task<Note?> GetByIdAsync(Guid id, Guid userId);
         Task<IEnumerable<Note>> GetAllUserNotesAsync(Guid userId);
         Task CreateAsync(Note note);
         Task UpdateAsync(Note note);
-        Task DeleteAsync(Guid noteId);
-        Task<IEnumerable<Note>> SearchSimilarAsync(float[] queryEmbedding, int limit = 5);
-        Task<IEnumerable<Note>> GetByCategoryAsync(string category);
-        Task<IEnumerable<Note>> SearchBySubTitle(string titleSubstring);
+        Task DeleteAsync(Guid noteId, Guid userId);
+        Task<IEnumerable<Note>> GetByCategoryAsync(string category, Guid userId);
+        Task<IEnumerable<Note>> SearchBySubTitle(string titleSubstring, Guid userId);
         Task<bool> SaveChangesAsync();
     }
 }

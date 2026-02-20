@@ -1,4 +1,5 @@
-﻿using smart_notes_backend.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using smart_notes_backend.Data;
 using smart_notes_backend.Entities;
 
 namespace smart_notes_backend.Repositories.Notes
@@ -11,49 +12,58 @@ namespace smart_notes_backend.Repositories.Notes
             _context = context;
         }
 
-        public Task CreateAsync(Note note)
+        public async Task CreateAsync(Note note)
         {
-            throw new NotImplementedException();
+            await _context.Notes.AddAsync(note);
+            
         }
 
-        public Task DeleteAsync(Guid noteId)
+        public async Task DeleteAsync(Guid noteId, Guid userId)
         {
-            throw new NotImplementedException();
+            var note = await GetByIdAsync(noteId, userId);
+            if (note != null)
+            {
+                _context.Notes.Remove(note);
+            }
         }
 
-        public Task<IEnumerable<Note>> GetAllUserNotesAsync(Guid userId)
+        public async Task<IEnumerable<Note>> GetAllUserNotesAsync(Guid userId)
         {
-            throw new NotImplementedException();
+            return await _context.Notes
+                .Where(note => note.UserId == userId)
+                .OrderByDescending(note => note.UpdatedAt)
+                .ToListAsync();
         }
 
-        public Task<IEnumerable<Note>> GetByCategoryAsync(string category)
+        public async Task<IEnumerable<Note>> GetByCategoryAsync(string category, Guid userId)
         {
-            throw new NotImplementedException();
+            return await _context.Notes
+                .Where(note => note.Category == category && note.UserId == userId)
+                .ToListAsync();
         }
 
-        public Task<Note?> GetByIdAsync(Guid id)
+        public async Task<Note?> GetByIdAsync(Guid id, Guid userId)
         {
-            throw new NotImplementedException();
+            return await _context.Notes
+                .FirstOrDefaultAsync(note => note.Id == id && note.UserId == userId);
         }
 
-        public Task<bool> SaveChangesAsync()
+        public async Task<IEnumerable<Note>> SearchBySubTitle(string titleSubstring, Guid userId)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<Note>> SearchBySubTitle(string titleSubstring)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<Note>> SearchSimilarAsync(float[] queryEmbedding, int limit = 5)
-        {
-            throw new NotImplementedException();
+            return await _context.Notes
+                .Where(note => note.UserId == userId && note.Title.Contains(titleSubstring))
+                .ToListAsync();
         }
 
         public Task UpdateAsync(Note note)
         {
-            throw new NotImplementedException();
+            _context.Notes.Update(note);
+            return Task.CompletedTask;
+        }
+
+        public async Task<bool> SaveChangesAsync()
+        {
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }
