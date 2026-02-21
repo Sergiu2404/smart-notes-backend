@@ -1,17 +1,24 @@
 ﻿using smart_notes_backend.Entities;
 using smart_notes_backend.Helpers.Authentication;
+using smart_notes_backend.Helpers.Vector;
 using smart_notes_backend.Models.Notes;
+using smart_notes_backend.Repositories.Chunks;
 using smart_notes_backend.Repositories.Notes;
+using smart_notes_backend.Services.AI;
+using smart_notes_backend.Services.Chunking;
 using System.Text.Json;
 
 namespace smart_notes_backend.Services.Notes
 {
     public class NotesService(
         INotesRepository notesRepository,
+        INoteChunksRepository chunksRepository,
+        IAIService aiService,
+        IChunkingService chunkingService,
         IUserContext userContext
     ) : INotesService
     {
-        public async Task<NoteResponseDto> CreateNoteAsync(CreateNoteDto noteDto, float[] embedding)
+        public async Task<NoteResponseDto> CreateNoteAsync(CreateNoteDto noteDto)
         {
             var note = new Note
             {
@@ -22,11 +29,34 @@ namespace smart_notes_backend.Services.Notes
                 Category = noteDto.Category,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                EmbeddingJson = JsonSerializer.Serialize(embedding)
             };
 
             await notesRepository.CreateAsync(note);
             await notesRepository.SaveChangesAsync();
+
+
+            var chunks = chunkingService.ChunkText(note.Content);
+
+            var chunkEntities = new List<NoteChunk>();
+            int index = 0;
+
+            foreach (var chunk in chunks)
+            {
+                var embedding = await aiService.GenerateEmbeddingAsync(chunk);
+
+                chunkEntities.Add(new NoteChunk
+                {
+                    Id = Guid.NewGuid(),
+                    NoteId = note.Id,
+                    UserId = note.UserId,
+                    Content = chunk,
+                    Embedding = VectorConverter.ToByteArray(embedding),
+                    ChunkIndex = index++,
+                });
+            }
+
+            await chunksRepository.CreateRangeAsync(chunkEntities);
+            await chunksRepository.SaveChangesAsync();
 
             return new NoteResponseDto
             (

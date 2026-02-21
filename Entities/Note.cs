@@ -8,9 +8,10 @@
         public string Category { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public string EmbeddingJson { get; set; }
-
+        
         public Guid UserId { get; set; }
         public virtual User User { get; set; }
+
+        public virtual ICollection<NoteChunk> Chunks { get; set; } = new List<NoteChunk>();
     }
 }

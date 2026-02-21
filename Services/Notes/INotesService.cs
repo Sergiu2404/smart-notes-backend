@@ -5,7 +5,7 @@ namespace smart_notes_backend.Services.Notes
 {
     public interface INotesService
     {
-        Task<NoteResponseDto> CreateNoteAsync(CreateNoteDto note, float[] embedding);
+        Task<NoteResponseDto> CreateNoteAsync(CreateNoteDto note);
         Task<IEnumerable<NoteResponseDto>> GetAllNotesAsync();
         Task<NoteResponseDto?> GetNoteByIdAsync(Guid id);
         Task UpdateNoteAsync(Guid id, UpdateNoteDto dto);
